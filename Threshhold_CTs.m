@@ -11,7 +11,7 @@ mask_3d = [];
 
 % Set paths
 input = 'D:\Final Year Project\Patient Elbow CTs\00000000_DICOM_CT_2018_02_28_000';
-output = 'D:\Final Year Project\threshholds2';
+output = 'D:\Final Year Project\threshholds3';
 
 % Left joint
 % for n = 1:92
@@ -44,9 +44,9 @@ for n = 1:90
     % saveas(outdisplay,filename);
 
     %% IF LOOKING TO SAVE MASKS
-    cd 'D:\Final Year Project\threshholds2';
+    cd 'D:\Final Year Project\threshholds3';
     filename = strcat('th_',num2str(n),'.png');
-    saveas(cleanMask,filename);
+    imwrite(cleanMask,filename);
       
     %% Convert to list of coordinates
     for i = 1:size(cleanMask,2)
