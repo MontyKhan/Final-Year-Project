@@ -10,22 +10,58 @@ imageVector = [];
 mask_3d = [];
 
 % Set paths
-input = 'D:\Final Year Project\Patient Elbow CTs\00000000_DICOM_CT_2018_02_28_000';
-output = 'D:\Final Year Project\threshholds3';
+input = 'D:\Coursework\Final Year Project\Patient Elbow CTs\';
+output = 'D:\Coursework\Final Year Project\threshholds4\';
+
+% Calculate number of files in input folder 
+d = dir('D:\Coursework\Final Year Project\Patient Elbow CTs\*.dcm');
+file_count = length(d);
+
+% Set original patient ID
+info = dicominfo(strcat(input, getfield(d,{1},'name')));
+patientID = info.PatientID;
+protocol = info.ProtocolName;
 
 % Left joint
 % for n = 1:92
 % Right joint
 
-for n = 1:90
+for n = 1:file_count
+    fprintf('Processing %i of %i\n', n, file_count);
+    
     %% Generate masks
-    filenum = 6624043 + n;                                      % Read image from file (right joint)
-%   filenum = 6623828;                                          % Read image from file (left joint)
-
-    filename = strcat(input ...                                 % Load file
-                      ,num2str(filenum) ...
-                      ,'.dcm');
+    filename = strcat(input ...                                 % Load file (directory)
+                      ,getfield(d,{n},'name'));                              % Load file (name)
     info = dicominfo(filename);
+    
+    if (contains((getfield(info,{1},'ImageType')), 'Secondary'))
+        continue;
+    end
+    
+    newID = info.PatientID;
+    newProtocol = info.ProtocolName;
+    
+    if (~strcmp(newID, patientID) || ~strcmp(newProtocol, protocol))
+        % Create point cloud
+        ptCloud = pointCloud(mask_3d);
+
+        % Show point cloud
+        pcshow(ptCloud)
+
+        % Save point cloud
+        fprintf('Generating point cloud.\n');
+        pt_name = strcat('D:\Coursework\Final Year Project\point_clouds\',patientID,'_',protocol(1),'_pc');
+        pcwrite(ptCloud,pt_name,'PLYFormat','binary');
+        
+        % Clear mask_3d for next patient
+        mask_3d = [];
+        
+        % Update patient ID
+        patientID = newID;
+        protocol = newProtocol;
+        info = info;
+    end
+
     image = dicomread(info);                                    % Will be in Grey units.
     
     mask = (image > 300);                                       % Threshold out values below 300 (i.e. soft tissue)
@@ -44,8 +80,8 @@ for n = 1:90
     % saveas(outdisplay,filename);
 
     %% IF LOOKING TO SAVE MASKS
-    cd 'D:\Final Year Project\threshholds3';
-    filename = strcat('th_',num2str(n),'.png');
+    cd 'D:\Coursework\Final Year Project\threshholds4';
+    filename = strcat(patientID,'_',protocol(1),'_th_',num2str(n),'.png');
     imwrite(cleanMask,filename);
       
     %% Convert to list of coordinates
@@ -57,9 +93,3 @@ for n = 1:90
         end
     end
 end
-
-% Create point cloud
-ptCloud = pointCloud(mask_3d);
-
-% Show point cloud
-pcshow(ptCloud)
