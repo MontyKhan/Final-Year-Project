@@ -10,8 +10,8 @@ imageVector = [];
 mask_3d = [];
 
 % Set paths
-input = 'D:\Final Year Project\Patient Elbow CTs\00000000_DICOM_CT_2018_02_28_000';
-output = 'D:\Final Year Project\threshholds3';
+input = 'D:\Coursework\Final Year Project\Patient Elbow CTs\00000000_DICOM_CT_2018_02_28_000';
+output = 'D:\Coursework\Final Year Project\threshholds4';
 
 % Left joint
 % for n = 1:92
@@ -44,18 +44,13 @@ for n = 1:90
     % saveas(outdisplay,filename);
 
     %% IF LOOKING TO SAVE MASKS
-    cd 'D:\Final Year Project\threshholds3';
+    cd 'D:\Coursework\Final Year Project\threshholds4';
     filename = strcat('th_',num2str(n),'.png');
     imwrite(cleanMask,filename);
       
     %% Convert to list of coordinates
-    for i = 1:size(cleanMask,2)
-        for j = 1:size(cleanMask,1)
-            if (cleanMask(i,j) == 1)
-                mask_3d = [mask_3d ; [i j (n*1.3)]];
-            end
-        end
-    end
+    [row, col] = find(cleanMask);
+    mask_3d = [mask_3d ; [row, col, repmat(n*1.3,length(row),1)]];
 end
 
 % Create point cloud
